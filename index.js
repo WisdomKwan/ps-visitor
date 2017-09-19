@@ -83,13 +83,14 @@ const psRaw = (extra, keywords, filterWaste = true) => {
 
       // use keys filter array.
       return tmp2.filter((value) => {
+        // filter waste.
         if (filterWaste) {
           // value not includes 'ps aux'.
           if (value.includes('ps aux')) return false;
           // value not includes 'grep' cmd.
           if (value.includes('grep')) {
             const t = parseLine(value);
-            if (t.command.cmd === 'grep') return false;
+            if (t[COMMAND].cmd === 'grep') return false;
           }
         }
 
@@ -100,7 +101,7 @@ const psRaw = (extra, keywords, filterWaste = true) => {
               if (!value.includes(element)) return false;
             });
           } else {
-            return value.includes(keywords);
+            if (!value.includes(keywords)) return false;
           }
         }
 
@@ -135,7 +136,7 @@ const checkHeader = (line) => {
 const parseLine = (line) => {
   // split into unit.
   const fields = line.split(/\s+/).filter((value) => {
-    return value !== '';
+    return value !== undefined && value !== null && value !== '';
   });
 
   // create line information object.
@@ -180,7 +181,7 @@ const ps = (condition, extra, keywords, filterWaste = true) => {
       });
 
       return tmp1.filter((value) => {
-
+        return checkCondition(value, condition);
       });
     });
 };
@@ -262,7 +263,25 @@ const checkCondition = (line, condition) => {
 
   // check command
   if (keys.includes(COMMAND)) {
+    let cmd = '';
+    let args = [];
+    if (typeof condition[COMMAND] === 'object') {
+      cmd = condition[COMMAND].cmd;
+      args = condition[COMMAND].args;
+    } else if (typeof condition[COMMAND] === 'string') {
+      cmd = condition[COMMAND];
+      args = [];
+    }
 
+    if (cmd) {
+      if (!stringCompare(line[COMMAND].cmd, cmd)) return false;
+    }
+    if (args && args.length > 0) {
+      if (line[COMMAND].args.length === 0) return false;
+      args.forEach((element) => {
+        if (!line[COMMAND].args.includes(element.trim())) return false;
+      });
+    }
   }
 
   return true;
@@ -270,7 +289,7 @@ const checkCondition = (line, condition) => {
 
 /**
  * compare line number data.
- * compare example: '>10 <20', '>=10 <= 20'.
+ * compare example: '>10 <20', '>=10 <=20'.
  * '>': greater then
  * '<': lower than
  * ...
@@ -354,6 +373,8 @@ const stringCompare = (origin, compare) => {
   } else {
     if (originTmp !== compareTmp) return false;
   }
+
+  return true;
 };
 
 /**
