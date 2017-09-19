@@ -44,7 +44,7 @@ const KILL_SIGNAL_LINUX = [
  * use `ps aux | grep ...` cmd get process information in current pc.
  * @param {String} extra
  * @param {String|Array<String>} keywords
- * @param {Boolean} filterWaste
+ * @param {Boolean} filterWaste=true
  * @return {Promise.<Array<String>>}
  */
 const psRaw = (extra, keywords, filterWaste = true) => {
@@ -97,9 +97,9 @@ const psRaw = (extra, keywords, filterWaste = true) => {
         // value includes keys.
         if (keywords) {
           if (Array.isArray(keywords)) {
-            keywords.forEach((element) => {
+            for (let element of keywords) {
               if (!value.includes(element)) return false;
-            });
+            }
           } else {
             if (!value.includes(keywords)) return false;
           }
@@ -166,7 +166,7 @@ const parseLine = (line) => {
  * @param {Object} condition
  * @param {String} extra
  * @param {String|Array<String>} keywords
- * @param {Boolean} filterWaste
+ * @param {Boolean} filterWaste=true
  * @return {Promise.<Array<Object>>}
  */
 const ps = (condition, extra, keywords, filterWaste = true) => {
@@ -181,7 +181,10 @@ const ps = (condition, extra, keywords, filterWaste = true) => {
       });
 
       return tmp1.filter((value) => {
-        return checkCondition(value, condition);
+        if (typeof condition === 'object' && Object.keys(condition).length > 0) {
+          return checkCondition(value, condition);
+        }
+        return true;
       });
     });
 };
@@ -266,8 +269,9 @@ const checkCondition = (line, condition) => {
     let cmd = '';
     let args = [];
     if (typeof condition[COMMAND] === 'object') {
-      cmd = condition[COMMAND].cmd;
-      args = condition[COMMAND].args;
+      const tKeys = Object.keys(condition[COMMAND]);
+      if (tKeys.includes('cmd')) cmd = condition[COMMAND].cmd;
+      if (tKeys.includes('args')) args = condition[COMMAND].args;
     } else if (typeof condition[COMMAND] === 'string') {
       cmd = condition[COMMAND];
       args = [];
@@ -278,9 +282,9 @@ const checkCondition = (line, condition) => {
     }
     if (args && args.length > 0) {
       if (line[COMMAND].args.length === 0) return false;
-      args.forEach((element) => {
+      for (let element of args) {
         if (!line[COMMAND].args.includes(element.trim())) return false;
-      });
+      }
     }
   }
 
@@ -306,14 +310,14 @@ const numberCompare = (origin, compare) => {
   let originTmp = NaN;
   if (typeof origin === 'number') originTmp = origin;
   else originTmp = +origin.trim();
-  if (!originTmp) return false;
+  if (Number.isNaN(originTmp))  return false;
 
   // split compare into array<string>.
   const compareTmp = compare.trim().split(' ');
   if (compareTmp.length === 0) return true;
 
   // compare origin and compare's element.
-  compareTmp.forEach((element) => {
+  for (let element of compareTmp) {
     const tElement = element.trim();
 
     if (tElement.startsWith('>=')) {
@@ -342,7 +346,7 @@ const numberCompare = (origin, compare) => {
         if (originTmp !== tCompare) return false;
       }
     }
-  });
+  }
 
   return true;
 };
