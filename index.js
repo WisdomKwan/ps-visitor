@@ -151,13 +151,13 @@ const parseLine = (line) => {
   info[STAT] = fields[7];
   info[STARTED] = fields[8];
   info[TIME] = fields[9];
-  info[COMMAND] = {
-    cmd: fields[10],
-    args: [],
-  };
-  for (let i=11; i<fields.length; i++) {
-    info[COMMAND].args.push(fields[i]);
+
+  let cmd = '';
+  for (let i=10; i<fields.length; i++) {
+    cmd += ` ${fields[i].trim()}`;
   }
+  info[COMMAND] = cmd;
+
   return info;
 };
 
@@ -192,17 +192,17 @@ const ps = (condition, extra, keywords, filterWaste = true) => {
 /**
  * check filter condition.
  * condition: {
- *    user: 'user name',
- *    pid: 'process id',
- *    cpu: '>2 <10',  cpu used percent
- *    mem: '>3 <20',  memory used percent
- *    vsz: '>10 <20', virtual memory used (in KiB)
- *    rss: '>10 <30', resident set size (in KiB)
- *    tt: 'controlling tty',
- *    stat: 'process state',
+ *    user<string>: 'user name',
+ *    pid<string>: 'process id',
+ *    cpu<string>: '>2 <10',  cpu used percent
+ *    mem<string>: '>3 <20',  memory used percent
+ *    vsz<string>: '>10 <20', virtual memory used (in KiB)
+ *    rss<string>: '>10 <30', resident set size (in KiB)
+ *    tt<string>: 'controlling tty',
+ *    stat<string>: 'process state',
  *    started: 'starting time',
  *    time: 'cumulative cpu time',
- *    command: 'command and all arguments',
+ *    command<string>: 'command and all arguments',
  * }
  * @param {Object} line
  * @param {Object} condition
@@ -266,24 +266,15 @@ const checkCondition = (line, condition) => {
 
   // check command
   if (keys.includes(COMMAND)) {
-    let cmd = '';
-    let args = [];
-    if (typeof condition[COMMAND] === 'object') {
-      const tKeys = Object.keys(condition[COMMAND]);
-      if (tKeys.includes('cmd')) cmd = condition[COMMAND].cmd;
-      if (tKeys.includes('args')) args = condition[COMMAND].args;
-    } else if (typeof condition[COMMAND] === 'string') {
-      cmd = condition[COMMAND];
-      args = [];
-    }
-
-    if (cmd) {
-      if (!stringCompare(line[COMMAND].cmd, cmd)) return false;
-    }
-    if (args && args.length > 0) {
-      if (line[COMMAND].args.length === 0) return false;
-      for (let element of args) {
-        if (!line[COMMAND].args.includes(element.trim())) return false;
+    const cmd = condition[COMMAND].trim().split(/\s+/);
+    if (cmd.length === 1) {
+      if (!stringCompare(line[COMMAND], cmd[0])) return false;
+    } else if (cmd.length > 1) {
+      for (let element of cmd) {
+        let t = element.trim();
+        if (!t) continue;
+        if (!t.startsWith('~')) t = '~' + t;
+        if (!stringCompare(line[COMMAND], t)) return false;
       }
     }
   }
@@ -313,12 +304,13 @@ const numberCompare = (origin, compare) => {
   if (Number.isNaN(originTmp))  return false;
 
   // split compare into array<string>.
-  const compareTmp = compare.trim().split(' ');
+  const compareTmp = compare.trim().split(/\s+/);
   if (compareTmp.length === 0) return true;
 
   // compare origin and compare's element.
   for (let element of compareTmp) {
     const tElement = element.trim();
+    if (!tElement) continue;
 
     if (tElement.startsWith('>=')) {
       const tCompare = +tElement.slice(2);
@@ -341,7 +333,9 @@ const numberCompare = (origin, compare) => {
         if (originTmp >= tCompare) return false;
       }
     } else {
-      const tCompare = +tElement;
+      let tCompare = -1;
+      if (tElement.startsWith('=')) tCompare = +tElement.slice(1);
+      else tCompare = +tElement;
       if (tCompare) {
         if (originTmp !== tCompare) return false;
       }
