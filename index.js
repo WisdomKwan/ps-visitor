@@ -44,7 +44,7 @@ const KILL_SIGNAL_LINUX = [
  * use `ps aux | grep ...` cmd get process information in current pc.
  * @param {String} extra
  * @param {String|Array<String>} keywords
- * @param {Boolean} filterWaste=true
+ * @param {Boolean} [filterWaste=true]
  * @return {Promise.<Array<String>>}
  */
 const psRaw = (extra, keywords, filterWaste = true) => {
@@ -169,7 +169,7 @@ const parseLine = (line) => {
  * @param {Object} condition
  * @param {String} extra
  * @param {String|Array<String>} keywords
- * @param {Boolean} filterWaste=true
+ * @param {Boolean} [filterWaste=true]
  * @return {Promise.<Array<Object>>}
  */
 const ps = (condition, extra, keywords, filterWaste = true) => {
