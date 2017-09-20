@@ -63,6 +63,7 @@ condition: {
 - `~`: contains
 - `>`: greater then
 - `<`: lower than
+
 ......
 
 ## Usage
