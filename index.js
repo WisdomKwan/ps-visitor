@@ -90,7 +90,10 @@ const psRaw = (extra, keywords, filterWaste = true) => {
           // value not includes 'grep' cmd.
           if (value.includes('grep')) {
             const t = parseLine(value);
-            if (t[COMMAND].cmd === 'grep') return false;
+            const tCmd = t[COMMAND].trim().split(/\s+/).filter((value) => {
+              return value !== undefined && value !== null && value !== '';
+            });
+            if (tCmd[0] === 'grep') return false;
           }
         }
 
@@ -152,8 +155,8 @@ const parseLine = (line) => {
   info[STARTED] = fields[8];
   info[TIME] = fields[9];
 
-  let cmd = '';
-  for (let i=10; i<fields.length; i++) {
+  let cmd = fields[10].trim();
+  for (let i=11; i<fields.length; i++) {
     cmd += ` ${fields[i].trim()}`;
   }
   info[COMMAND] = cmd;
