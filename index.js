@@ -42,10 +42,10 @@ const KILL_SIGNAL_LINUX = [
 
 /**
  * use `ps aux | grep ...` cmd get process information in current pc.
- * @param {String} extra
- * @param {String|Array<String>} keywords
- * @param {Boolean} [filterWaste=true]
- * @return {Promise.<Array<String>>}
+ * @param {string} [extra]
+ * @param {(string|string[])} [keywords]
+ * @param {boolean} [filterWaste=true]
+ * @return {Promise.<string[]>}
  */
 const psRaw = (extra, keywords, filterWaste = true) => {
   // shell command
@@ -118,8 +118,8 @@ const psRaw = (extra, keywords, filterWaste = true) => {
 
 /**
  * check ps information header
- * @param {String} line
- * @return {Boolean}
+ * @param {string} line - psRaw function return string array element.
+ * @return {boolean}
  */
 const checkHeader = (line) => {
   const tmp = line.replace(/\s/ig, '');
@@ -133,7 +133,7 @@ const checkHeader = (line) => {
 
 /**
  * unit info string covert to info object.
- * @param {String} line
+ * @param {string} line - psRaw function return string array element.
  * @return {Object}
  */
 const parseLine = (line) => {
@@ -166,11 +166,11 @@ const parseLine = (line) => {
 
 /**
  * get process status information.
- * @param {Object} condition
- * @param {String} extra
- * @param {String|Array<String>} keywords
- * @param {Boolean} [filterWaste=true]
- * @return {Promise.<Array<Object>>}
+ * @param {Object} [condition]
+ * @param {string} [extra]
+ * @param {(string|string[])} [keywords]
+ * @param {boolean} [filterWaste=true]
+ * @return {Promise.<Object[]>}
  */
 const ps = (condition, extra, keywords, filterWaste = true) => {
   return psRaw(extra, keywords, filterWaste)
@@ -209,7 +209,7 @@ const ps = (condition, extra, keywords, filterWaste = true) => {
  * }
  * @param {Object} line
  * @param {Object} condition
- * @return {Boolean}
+ * @return {boolean}
  */
 const checkCondition = (line, condition) => {
   // check condition all keys.
@@ -291,9 +291,9 @@ const checkCondition = (line, condition) => {
  * '>': greater then
  * '<': lower than
  * ...
- * @param {Number|String} origin
- * @param {String} compare
- * @return {Boolean}
+ * @param {(number|string)} origin
+ * @param {string} compare
+ * @return {boolean}
  */
 const numberCompare = (origin, compare) => {
   // check params.
@@ -352,9 +352,9 @@ const numberCompare = (origin, compare) => {
  * compare line string data.
  * compare example: '~Sublime'
  * '~': contains
- * @param {String} origin
- * @param {String} compare
- * @return {Boolean}
+ * @param {string} origin
+ * @param {string} compare
+ * @return {boolean}
  */
 const stringCompare = (origin, compare) => {
   // check params.
@@ -380,8 +380,8 @@ const stringCompare = (origin, compare) => {
 
 /**
  * kill the pid process.
- * @param {Number|String} pid
- * @param {Number|String} signal
+ * @param {(number|string)} pid
+ * @param {(number|string)} [signal]
  * @return {Promise}
  */
 const kill = (pid, signal) => {
@@ -411,8 +411,8 @@ const kill = (pid, signal) => {
 
 /**
  * get the signal's index.
- * @param {String} signal
- * @return {Number}
+ * @param {string} signal
+ * @return {number}
  */
 const getSignal = (signal) => {
   let tmp = signal.trim();
@@ -431,8 +431,8 @@ const getSignal = (signal) => {
 
 /**
  * get the signal's index by shell command.
- * @param {String} signal
- * @return {Promise.<Number>}
+ * @param {string} signal
+ * @return {Promise.<number>}
  */
 const getSignalRaw = (signal) => {
   let tmp = signal.trim();
