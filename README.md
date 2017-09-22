@@ -13,15 +13,15 @@ $ npm install ps-visitor
 ### ps (condition, extra, keywords, filterWaste = true)
 
 - `condition:Object`(optional): result query condition.
-- `extra:String`(optional): `ps aux | ...` cmd extra, example: `grep node`.
-- `keywords:String|Array<String>`(optional): result easy filter.
-- `filterWaste:Boolean`(optional): filter includes `grep` and `ps aux` process status.
-- `return:Promise.<Array<Object>>`: return result.
+- `extra:string`(optional): `ps aux | ...` cmd extra, example: `grep node`.
+- `keywords:string|string[]`(optional): result easy filter.
+- `filterWaste:boolean`(optional): filter includes `grep` and `ps aux` process status.
+- `return:Promise.<Object[]>`: return result.
 
 ### kill (pid, signal)
 
-- `pid:Number|String`: process id.
-- `signal:Number|String`(optional): kill signal id or name.
+- `pid:number|string`: process id.
+- `signal:number|string`(optional): kill signal id or name.
 - `return:Promise`
 
 ### result
@@ -64,7 +64,7 @@ condition: {
 - `>`: greater then
 - `<`: lower than
 
-......
+    ......
 
 ## Usage
 
